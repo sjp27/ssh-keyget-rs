@@ -1,0 +1,10 @@
+[package]
+name = "ssh-keyget-rs"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+makiko = "0.2.4"
+tokio = {version = "1.43.0", features = ["full"]}
+base64 = "0.22.1"
+clap = { version = "4.5.31", features = ["derive"] }
