@@ -10,6 +10,7 @@ use makiko::kex;
 use makiko::pubkey;
 use base64::prelude::*;
 use clap::Parser;
+
 #[derive(Parser)]
 /// Utility to get the SSH public key from a server v1.0.0
 struct Cli {
@@ -54,12 +55,12 @@ async fn main() {
                 print!("{}", BASE64_STANDARD.encode(pubkey.encode()));
                 println!(" {} {}", pubkey.type_str(), pubkey.fingerprint());
                 accept.accept();
+                break
             },
 
             // All other events can be ignored
             _ => {},
         }
-        break
     }
 
     // We aren't going to use the client
@@ -99,6 +100,7 @@ pub fn get_client_config(key_type: &str) -> makiko::ClientConfig {
             );
         }
         else {
+            println!("Unknown key type");
             c.server_pubkey_algos.clear();
         }
 
