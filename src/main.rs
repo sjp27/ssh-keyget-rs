@@ -11,6 +11,10 @@ use makiko::pubkey;
 use base64::prelude::*;
 use clap::Parser;
 
+const SSH2_HEADER: &str = "---- BEGIN SSH2 PUBLIC KEY ----";
+const SSH2_FOOTER: &str = "---- END SSH2 PUBLIC KEY ----";
+const SSH2_WIDTH: usize = 70;
+
 #[derive(Parser)]
 /// Utility to get the SSH public key from a server v1.0.0
 struct Cli {
@@ -18,6 +22,8 @@ struct Cli {
     host_port: String,
     /// The key type to get ed25519, rsa_sha2, ecdsa, rsa
     key_type: String,
+    /// Export key in RFC4716 format
+    export: Option<char>
 }
 
 #[tokio::main]
@@ -52,8 +58,19 @@ async fn main() {
         match event {
             // Handle the server public key
             makiko::ClientEvent::ServerPubkey(pubkey, accept) => {
-                print!("{}", BASE64_STANDARD.encode(pubkey.encode()));
-                println!(" {} {}", pubkey.type_str(), pubkey.fingerprint());
+                if args.export == Some('e') {
+                    println!("{SSH2_HEADER}");
+                    println!("Comment:  {} {}", pubkey.type_str(), pubkey.fingerprint());
+                    let chunks = split_string_into_chunks(BASE64_STANDARD.encode(pubkey.encode()).as_str(), SSH2_WIDTH);
+                    for (_i, chunk) in chunks.iter().enumerate() {
+                        println!("{chunk}");
+                    }
+                    println!("{SSH2_FOOTER}");
+                }
+                else {
+                    print!("{}", BASE64_STANDARD.encode(pubkey.encode()));
+                    println!(" {} {}", pubkey.type_str(), pubkey.fingerprint());
+                }
                 accept.accept();
                 break
             },
@@ -111,4 +128,12 @@ pub fn get_client_config(key_type: &str) -> makiko::ClientConfig {
             &mac::HMAC_SHA1_ETM, &mac::HMAC_SHA1,
         ]);
     })
+}
+fn split_string_into_chunks(string: &str, chunk_size: usize) -> Vec<String> {
+    string
+        .chars()
+        .collect::<Vec<_>>()
+        .chunks(chunk_size)
+        .map(|chunk| chunk.iter().collect())
+        .collect()
 }

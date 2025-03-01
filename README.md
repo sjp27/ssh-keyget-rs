@@ -5,6 +5,7 @@
 **ssh-keyget-rs**
 [*host:port*]
 [*key_type(ed25519,rsa_sha2,ecdsa,rsa)*]
+[*export(e)*]
 
 # DESCRIPTION
 **ssh-keyget-rs**
@@ -24,6 +25,11 @@ The options are as follows:
 > "ecdsa",
 > "rsa". 
 
+*export*
+
+> Option "e" will output the public key in
+> "RFC4716"
+> format. This option allows exporting keys for use by other programs.
 
 If a public key obtained using
 **ssh-keyget-rs**
@@ -43,9 +49,12 @@ Print the RSA public key for server
 	ssh-keyget-rs hostname:port rsa
 
 Save RSA public key for server
-*hostname*:
+*hostname*
+in
+"RFC4716"
+format :
 
-	ssh-keyget-rs hostname:port rsa > publickey
+	ssh-keyget-rs hostname:port rsa e > publickey
 
 # SEE ALSO
 
